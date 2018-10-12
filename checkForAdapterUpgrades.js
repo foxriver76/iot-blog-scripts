@@ -27,6 +27,6 @@ schedule('0 18 * * *', () => {
                     subject: 'Es sind neue Adapter Updates für deinen Rock64 verfügbar',
                     text:    'Die folgenden Adapter sind aktualisierbar:\n' + stdout
              });
-        } else if(logging) log('No new adapter updates available', 'info'); // endIf
+        } else if(logging) log('No new adapter updates available', 'info');
     });
 });
