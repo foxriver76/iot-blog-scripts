@@ -29,6 +29,6 @@ schedule('0 18 * * *', () => {
                     subject: 'Es sind neue Updates für deinen Rock64 verfügbar',
                     text:    'Die folgenden Updates sind verfügbar:\n' + upgradeable
              });
-        } else if(logging) log('No new updates available', 'info'); // endIf
+        } else if(logging) log('No new updates available', 'info');
     });
 });
