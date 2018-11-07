@@ -42,68 +42,68 @@ on({id: 'javascript.0.alexaTriggerLuftfeuchtigkeit', change: 'any'}, obj => {
 
     if (logging) log('Alexa ventilation check triggered', 'info');
 
-let ventilate = getState('javascript.0.sleepingRoom.ventilationRecommendation').val;
-let randomState = getRandomArbitrary(1, 2);
-let text;
+    let ventilate = getState('javascript.0.sleepingRoom.ventilationRecommendation').val;
+    let randomState = getRandomArbitrary(1, 2);
+    let text;
 
-if(ventilate) {
-    switch (randomState) {
-        case 1:
-        text = 'Du solltest lüften, da es draußen trockener ist';
-        break;
-        case 2:
-        text = 'Lüfte, es ist so feucht hier drin';
-        break;
-    } // endSwitch
-} else {
-    switch (randomState) {
-        case 1:
-        text = 'Du solltest nicht lüften';
-        break;
-        case 2:
-        text = 'Bitte nicht lüften';
-        break;
-    } // endSwitch
-} // endElse
+    if(ventilate) {
+        switch (randomState) {
+            case 1:
+            text = 'Du solltest lüften, da es draußen trockener ist';
+            break;
+            case 2:
+            text = 'Lüfte, es ist so feucht hier drin';
+            break;
+        } // endSwitch
+    } else {
+        switch (randomState) {
+            case 1:
+            text = 'Du solltest nicht lüften';
+            break;
+            case 2:
+            text = 'Bitte nicht lüften';
+            break;
+        } // endSwitch
+    } // endElse
 
-// Get serial number of last used echo device
-let serialNumber = getState('alexa2.0.History.serialNumber').val;
-setState('alexa2.0.Echo-Devices.' + serialNumber + '.Commands.speak', text, false);
+    // Get serial number of last used echo device
+    let serialNumber = getState('alexa2.0.History.serialNumber').val;
+    setState('alexa2.0.Echo-Devices.' + serialNumber + '.Commands.speak', text, false);
 });
 
 on({id: 'ID_OF_OUTSIDE_HUMIDITY_DATAPOINT', change: 'any'}, obj => {
     if (logging) log('Triggered ventilation recommendation script', 'info');
-// Get inside and outside humidity and temperature
-let relHumidityOutdside = getState('ID_OF_OUTSIDE_HUMIDITY_DATAPOINT').val;
-let temperatureOutside = getState('ID_OF_OUTSIDE_TEMP_DATAPOINT').val;
-let relHumidityInside = getState('ID_OF_INSIDE_HUMIDITY_DATAPOINT').val;
-let temperatureInside = getState('ID_OF_INSIDE_TEMP_DATAPOINT').val;
-// Calc ventilation recommendation and absolute humidity inside and outside
-let jsonRes = ventilateRoom(relHumidityInside, temperatureInside, relHumidityOutdside, temperatureOutside);
-// Set states
-setState('javascript.0.sleepingRoom.absoluteHumidity', jsonRes.insideAbsoluteHumidity, true);
-setState('javascript.0.garden.absoluteHumidity', jsonRes.outsideAbsoluteHumidity, true);
-setState('javascript.0.sleepingRoom.ventilationRecommendation', jsonRes.ventilate, true);
+    // Get inside and outside humidity and temperature
+    let relHumidityOutdside = getState('ID_OF_OUTSIDE_HUMIDITY_DATAPOINT').val;
+    let temperatureOutside = getState('ID_OF_OUTSIDE_TEMP_DATAPOINT').val;
+    let relHumidityInside = getState('ID_OF_INSIDE_HUMIDITY_DATAPOINT').val;
+    let temperatureInside = getState('ID_OF_INSIDE_TEMP_DATAPOINT').val;
+    // Calc ventilation recommendation and absolute humidity inside and outside
+    let jsonRes = ventilateRoom(relHumidityInside, temperatureInside, relHumidityOutdside, temperatureOutside);
+    // Set states
+    setState('javascript.0.sleepingRoom.absoluteHumidity', jsonRes.insideAbsoluteHumidity, true);
+    setState('javascript.0.garden.absoluteHumidity', jsonRes.outsideAbsoluteHumidity, true);
+    setState('javascript.0.sleepingRoom.ventilationRecommendation', jsonRes.ventilate, true);
 });
 
 /* Internals */
 
 function calcAbsoluteHumidity(relHumidity, temperature) {
     let res = ((6.112 * Math.pow(Math.E, ((17.67 * temperature) / (temperature + 243.5))) * relHumidity * 2.1674)) / (273.15 + temperature);
-return Math.round(res * 100) / 100;
+    return Math.round(res * 100) / 100;
 } // endCalcAbsoluteHumidity
 
 function ventilateRoom(relHumidityInside, tempInside, relHumidityOutside, tempOutside, threshold=4) {
     let res = JSON.parse('{}');
-res.insideAbsoluteHumidity = calcAbsoluteHumidity(relHumidityInside, tempInside);
-res.outsideAbsoluteHumidity = calcAbsoluteHumidity(relHumidityOutside, tempOutside);
-res.diff = Math.round((res.insideAbsoluteHumidity - res.outsideAbsoluteHumidity) * 100) / 100;
+    res.insideAbsoluteHumidity = calcAbsoluteHumidity(relHumidityInside, tempInside);
+    res.outsideAbsoluteHumidity = calcAbsoluteHumidity(relHumidityOutside, tempOutside);
+    res.diff = Math.round((res.insideAbsoluteHumidity - res.outsideAbsoluteHumidity) * 100) / 100;
 
-if (res.diff > threshold)
-res.ventilate = true;
-else
-    res.ventilate = false;
-return res;
+    if (res.diff > threshold)
+    res.ventilate = true;
+    else
+        res.ventilate = false;
+    return res;
 } // endVentilateRoom
 
 function getRandomArbitrary(min, max) {
