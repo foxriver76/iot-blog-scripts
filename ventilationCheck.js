@@ -93,7 +93,7 @@ function calcAbsoluteHumidity(relHumidity, temperature) {
     return Math.round(res * 100) / 100;
 } // endCalcAbsoluteHumidity
 
-function ventilateRoom(relHumidityInside, tempInside, relHumidityOutside, tempOutside, threshold=4) {
+function ventilateRoom(relHumidityInside, tempInside, relHumidityOutside, tempOutside, threshold=2.0) {
     let res = JSON.parse('{}');
     res.insideAbsoluteHumidity = calcAbsoluteHumidity(relHumidityInside, tempInside);
     res.outsideAbsoluteHumidity = calcAbsoluteHumidity(relHumidityOutside, tempOutside);
