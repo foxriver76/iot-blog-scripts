@@ -13,8 +13,8 @@
 
 const logging = true;
 
-const senderMail = 'moritz-iobroker@web.de';
-const receiverMail = 'moritz.heusinger@gmail.com';
+const senderMail = 'john.doe@femail.com';
+const receiverMail = 'jane.doe@mail.com';
 
 on({id: 'admin.0.info.newUpdates', ack: true, change: 'any', val: true}, (obj) => {
     if (logging) log('New adapter updates are available', 'info');
