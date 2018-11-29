@@ -13,12 +13,13 @@
 
 const logging = true;
 
-const senderMail = 'john.doe@femail.com';
-const receiverMail = 'jane.doe@mail.com';
+const senderMail = 'moritz-iobroker@web.de';
+const receiverMail = 'moritz.heusinger@gmail.com';
 
-on({id: 'admin.0.info.newUpdates', ack: true, change: 'any', val: true}, (obj) => {
+on({id: 'admin.0.info.updatesJson', ack: true, change: 'ne'}, (obj) => {
+    if(!getState('admin.0.info.newUpdates').val) return;
     if (logging) log('New adapter updates are available', 'info');
-    let upgradeable = JSON.parse(getState('admin.0.info.updatesJson').val);
+    let upgradeable = JSON.parse(obj.state.val);
     let text = 'Die folgenden Adapter sind aktualisierbar:\n';
     for (let adapter in upgradeable) {
         text += 'Adapter ' + JSON.stringify(adapter) + ' kann von ' + 
