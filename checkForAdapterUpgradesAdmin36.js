@@ -13,8 +13,8 @@
 
 const logging = true;
 
-const senderMail = 'moritz-iobroker@web.de';
-const receiverMail = 'moritz.heusinger@gmail.com';
+const senderMail = 'john.doe@femail.com';
+const receiverMail = 'jane.doe@mail.com';
 
 on({id: 'admin.0.info.updatesJson', ack: true, change: 'ne'}, (obj) => {
     if(!getState('admin.0.info.newUpdates').val) return;
