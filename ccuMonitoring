@@ -42,10 +42,10 @@ schedule('*/2 * * * *', () => {
 
     /* CuxD based*/
     const upTimeScript = `
-    string command = "cat /proc/uptime | awk '// { printf $1/3600 }'";
-    dom.GetObject ("CUxD.CUX2801001:2.CMD_SETS").State (command);
-    dom.GetObject ("CUxD.CUX2801001:2.CMD_QUERY_RET").State (1);
-    WriteLine(dom.GetObject("CUxD.CUX2801001:2.CMD_RETS").State());`;
+        string command = "cat /proc/uptime | awk '// { printf $1/3600 }'";
+        dom.GetObject ("CUxD.CUX2801001:2.CMD_SETS").State (command);
+        dom.GetObject ("CUxD.CUX2801001:2.CMD_QUERY_RET").State (1);
+        WriteLine(dom.GetObject("CUxD.CUX2801001:2.CMD_RETS").State());`;
 
     sendTo('hm-rega.0', upTimeScript, res => {
         if (logging) log(JSON.stringify(res), 'info');
