@@ -19,7 +19,7 @@ const receiverMail = 'jane.doe@mail.com';
 schedule('0 18 * * *', () => {
     exec('apt update >/dev/null && apt list --upgradeable', (err, stdout, stderr) => {
         let upgradeable = stdout.split('...')[1];
-        if(upgradeable.length <= 8) upgradeable = false; 
+        if(upgradeable.length <= 8) upgradeable = null; 
         if(logging) log('Checking for updates via apt ...', 'info');
         if(upgradeable) {
             if(logging) log('The following upgrades are available:\n' + upgradeable, 'info');
