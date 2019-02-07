@@ -1,0 +1,98 @@
+//  Program CCU Monitoring
+/*
+*   @author Moritz Heusinger <moritz.heusinger@gmail.com>
+*   This script monitors the uptime, system temperature and cpu frequency of
+*   the CCU.
+*   If you are not familiar with CuxD, you should use the exec methods.
+*/
+
+const logging = false;
+
+// Create states
+createState('javascript.0.ccu.cpuFrequency', {
+    type: 'number',
+    write: false,
+    read: true,
+    unit: 'MHz'
+});
+
+createState('javascript.0.ccu.systemTemperature', {
+    type: 'number',
+    write: false,
+    read: true,
+    unit: '°C'
+});
+
+createState('javascript.0.ccu.uptime', {
+    type: 'number',
+    write: false,
+    read: true,
+    unit: 'h'
+});
+
+// Update every 2 minutes
+schedule('*/2 * * * *', () => {
+    /* exec based 
+    const upTimeScript = `
+        string stderr;
+        string stdout;
+        system.Exec("cat /proc/uptime | awk '// { printf $1/3600 }'", &stdout, &stderr);
+        WriteLine(stdout);`;
+    */
+
+    /* CuxD based*/
+    const upTimeScript = `
+    string command = "cat /proc/uptime | awk '// { printf $1/3600 }'";
+    dom.GetObject ("CUxD.CUX2801001:2.CMD_SETS").State (command);
+    dom.GetObject ("CUxD.CUX2801001:2.CMD_QUERY_RET").State (1);
+    WriteLine(dom.GetObject("CUxD.CUX2801001:2.CMD_RETS").State());`;
+
+    sendTo('hm-rega.0', upTimeScript, res => {
+        if (logging) log(JSON.stringify(res), 'info');
+        if (!res.error) setState('javascript.0.ccu.uptime', parseFloat(res.result), true);
+        else log(res.error, 'warn');
+    });
+
+    /* exec based
+    const sysTempScript = `
+        string stderr;
+        string stdout;
+        system.Exec("/usr/bin/vcgencmd measure_temp | awk '// { printf substr($1, length($1) -5, 4)}'", &stdout, &stderr);
+        WriteLine(stdout);`;
+    */
+
+    /* CuxD based */
+    const sysTempScript = `
+
+        string command = "/usr/bin/vcgencmd measure_temp | awk '// { printf substr($1, length($1) -5, 4)}'";
+        dom.GetObject("CUxD.CUX2801001:1.CMD_SETS").State(command);
+        dom.GetObject("CUxD.CUX2801001:1.CMD_QUERY_RET").State(1);
+        WriteLine(dom.GetObject("CUxD.CUX2801001:1.CMD_RETS").State());`;
+
+    sendTo('hm-rega.0', sysTempScript, res => {
+        if (logging) log(JSON.stringify(res), 'info');
+        if (!res.error) setState('javascript.0.ccu.systemTemperature', parseFloat(res.result), true);
+        else log(res.error, 'warn');
+    });
+
+    /* exec based
+    const cpuFrequencyScript = `
+        string stderr;
+        string stdout;
+        system.Exec("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq | awk '// {printf $1/1000}'", &stdout, &stderr);
+        WriteLine(stdout);`;
+    */
+
+    /* CuxD based */
+    const cpuFrequencyScript = `
+        string command = "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq | awk '// {printf $1/1000}'";
+        dom.GetObject("CUxD.CUX2801001:3.CMD_SETS").State(command);
+        dom.GetObject("CUxD.CUX2801001:3.CMD_QUERY_RET").State (1);
+        WriteLine(dom.GetObject ("CUxD.CUX2801001:3.CMD_RETS").State());`;
+
+    sendTo('hm-rega.0', cpuFrequencyScript, res => {
+        if (logging) log(JSON.stringify(res), 'info');
+        if (!res.error) setState('javascript.0.ccu.cpuFrequency', parseFloat(res.result), true);
+        else log(res.error, 'warn');
+    });
+});
