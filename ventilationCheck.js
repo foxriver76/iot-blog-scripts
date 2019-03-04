@@ -6,6 +6,8 @@
 *   is set as state. The absolute humidity values are set as state too.
 *   The script also contains a datapoint, which triggers speech output of the
 *   last used Amazon Alexa device.
+*
+*   Requirement: Running isntance of Alexa2 adapter
 */
 
 createState('javascript.0.sleepingRoom.absoluteHumidity', {
@@ -79,7 +81,7 @@ on({id: 'ID_OF_OUTSIDE_HUMIDITY_DATAPOINT', change: 'any'}, obj => {
     const relHumidityInside = getState('ID_OF_INSIDE_HUMIDITY_DATAPOINT').val;
     const temperatureInside = getState('ID_OF_INSIDE_TEMP_DATAPOINT').val;
     // Calc ventilation recommendation and absolute humidity inside and outside
-    const jsonRes = ventilateRoom(relHumidityInside, temperatureInside, relHumidityOutdside, temperatureOutside, threshold=2.0);
+    const jsonRes = ventilateRoom(relHumidityInside, temperatureInside, relHumidityOutdside, temperatureOutside);
     // Set states
     setState('javascript.0.sleepingRoom.absoluteHumidity', jsonRes.insideAbsoluteHumidity, true);
     setState('javascript.0.garden.absoluteHumidity', jsonRes.outsideAbsoluteHumidity, true);
