@@ -1,4 +1,4 @@
-//  Program Ventilate Bedroom Check
+//  Program Ventilation Check
 /*
 *   @author Moritz Heusinger <moritz.heusinger@gmail.com>
 *   The program checks the absolute humidity of an inside room and outside.
@@ -21,12 +21,12 @@ const javaScriptInstance = 0;
 const rooms = [
     {
         roomName: `sleepingRoom`,
-        outsideHumidityState: `hm-rpc.1.000ED8A9909A27.1.HUMIDITY`,
-        outsideTemperatureState: `hm-rpc.1.000ED8A9909A27.1.ACTUAL_TEMPERATURE`,
-        insideHumidityState: `hm-rpc.1.000A98A98A8FD7.1.HUMIDITY`,
-        insideTemperatureState: `hm-rpc.1.000A98A98A8FD7.1.ACTUAL_TEMPERATURE`,
-        humidityThreshold: 2,
-        minHumidity: 45
+        outsideHumidityState: `***FILL IN YOUR STATE***`,
+        outsideTemperatureState: `***FILL IN YOUR STATE***`,
+        insideHumidityState: `***FILL IN YOUR STATE***`,
+        insideTemperatureState: `***FILL IN YOUR STATE***`,
+        humidityThreshold: 2, /* YOU ARE ALLOWED TO CHANGE IF YOU WANT */
+        minHumidity: 45 /* YOU ARE ALLOWED TO CHANGE IF YOU WANT */
     }
 ];
 
