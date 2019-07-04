@@ -23,10 +23,11 @@ createState('javascript.0.system.debianUpgradeable', {
     read: true
 });
 
+schedule('0 18 * * *', () => {
     exec('apt update >/dev/null || sudo apt update >/dev/null && apt list --upgradeable', (err, stdout, stderr) => {
         let upgradeable = stdout.split('...')[1];
         if (logging) log('Checking for updates via apt ...', 'info');
-        if (stderr && !stdout) return log(`Error checking for updates via apt: ${stderr}`, `error`);
+        if (stderr) return log(`Error checking for updates via apt: ${stderr}`, `error`);
         if (upgradeable.length <= 8) upgradeable = null;
         if (upgradeable) {
             let upgradeableArrayString = JSON.stringify(upgradeable.split('\n').filter(element => element !== ''));
@@ -47,3 +48,4 @@ createState('javascript.0.system.debianUpgradeable', {
             setState('javascript.0.system.debianUpgradeable', '[]', true);
         } // endElse
     });
+});
