@@ -7,12 +7,15 @@
 *   logging:        if true, information will be logged
 *   senderMail:     mail address of the sender
 *   receiverMail:   target mail address
+*
+*    Requirement: An active instance of the Mail adapter
+*
 */
 
 const logging = true;
 
-const senderMail = 'moritz-iobroker@web.de';
-const receiverMail = 'moritz.heusinger@gmail.com';
+const senderMail = 'john.doe@mail.com';
+const receiverMail = 'jane.doe@fmail.com';
 
 createState('javascript.0.system.debianUpgradeable', {
     type: 'string',
