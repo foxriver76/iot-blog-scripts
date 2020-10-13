@@ -34,7 +34,7 @@ let handleScreensaverEvents = function () {
         clearTimeout(screensaverTimeout);
     }
     
-    if (screensaverView == vis.activeView) {
+    if (screensaverView === vis.activeView) {
         // screensaver active and clicked -> disable
         console.log('Disable screensaver');
         vis.changeView(prevScreensaverView);
