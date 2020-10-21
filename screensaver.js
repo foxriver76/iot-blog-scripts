@@ -5,8 +5,8 @@
     click event detected for the defined seconds
 */
 let screensaverView = 'screensaver';
+let prevScreensaverView = 'home';
 let screensaverSeconds = 120;
-let prevScreensaverView;
 let debounce;
 
 let activateScreensaver = function () {
