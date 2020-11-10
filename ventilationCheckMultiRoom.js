@@ -10,14 +10,15 @@
 *   Require: Instance of Alexa2 Adapter
 *
 *   Create your rooms in the rooms array with a name and the states which contain the desired values.
-*   Humidity Threshold is used to only give a ventilate claculation if outside absolute humidity - the
-*   threshold is less than inside absolute humidity. Min Humidity is used to make sure that you only get a 
+*   Humidity Threshold is used to only give a ventilate calculation if outside absolute humidity - the
+*   threshold is less than inside absolute humidity. Min Humidity is used to make sure that you only get a
 *   ventilation recommendation, if the relative inside humidity is above the min value.
-*   Also configure javascript instance if it differs from 0.
+*   You can additionally define a namespace, which will be appended to the states, e.g. '0_Userdata.0.Lueftungsempfehlung'
 */
 
 const logging = true;
-const javaScriptInstance = 0;
+const namespace = ``;
+
 const rooms = [
     {
         roomName: `sleepingRoom`,
@@ -33,53 +34,69 @@ const rooms = [
 const triggersInsideHumidity = [];
 const triggersAlexa = [];
 
+try {
+    // create counter outside of rooms
+    await createStateAsync(namespace ? `${namespace}.totalVentilationRecommendations` : `totalVentilationRecommendations`, {
+        type: `number`,
+        read: true,
+        write: false,
+        name: `Anzahl Lüftungsempfehlungen`
+    });
+} catch (e) {
+    log(`Could not create trigger dp for ventilation recommendations: ${e}`, `error`);
+}
+
 for (const room of rooms) {
-    createState(`${room.roomName}.absoluteHumidity`, {
-        type: `number`,
-        read: true,
-        write: false,
-        unit: `g/m^3`,
-        name: `${room.roomName} Absolute Feuchtigkeit`
-    });
+    try {
+        await createStateAsync(`${namespace ? `${namespace}.` : ''}${room.roomName}.absoluteHumidity`, {
+            type: `number`,
+            read: true,
+            write: false,
+            unit: `g/m^3`,
+            name: `${room.roomName} Absolute Feuchtigkeit`
+        });
 
-    createState(`${room.roomName}.outsideAbsoluteHumidity`, {
-        type: `number`,
-        read: true,
-        write: false,
-        unit: `g/m^3`,
-        name: `${room.roomName} Absolute Feuchtigkeit Außen`
-    });
+        await createStateAsync(`${namespace ? `${namespace}.` : ''}${room.roomName}.outsideAbsoluteHumidity`, {
+            type: `number`,
+            read: true,
+            write: false,
+            unit: `g/m^3`,
+            name: `${room.roomName} Absolute Feuchtigkeit Außen`
+        });
 
-    createState(`${room.roomName}.ventilationRecommendation`, {
-        type: `boolean`,
-        read: true,
-        write: false,
-        name: `${room.roomName} Lüftungsempfehlung`
-    });
+        await createStateAsync(`${namespace ? `${namespace}.` : ''}${room.roomName}.ventilationRecommendation`, {
+            type: `boolean`,
+            read: true,
+            write: false,
+            name: `${room.roomName} Lüftungsempfehlung`
+        });
 
-    createState(`${room.roomName}.alexaTriggerLuftfeuchtigkeit`, {
-        type: `boolean`,
-        read: true,
-        write: true,
-        role: `button`,
-        name: `${room.roomName} Alexa Trigger Luftfeuchtigkeit`,
-        smartName: {
-            de: `${room.roomName} Alexa Trigger Luftfeuchtigkeit`
-        }
-    });
+        const triggerId = await createStateAsync(`${namespace ? `${namespace}.` : ''}${room.roomName}.alexaTriggerLuftfeuchtigkeit`, {
+            type: `boolean`,
+            read: true,
+            write: true,
+            role: `button`,
+            name: `${room.roomName} Alexa Trigger Luftfeuchtigkeit`,
+            smartName: {
+                de: `${room.roomName} Alexa Trigger Luftfeuchtigkeit`
+            }
+        });
 
-    triggersAlexa.push(`javascript.${javaScriptInstance}.${room.roomName}.alexaTriggerLuftfeuchtigkeit`);
-    triggersInsideHumidity.push(room.insideHumidityState);
+        triggersAlexa.push(triggerId);
+        triggersInsideHumidity.push(room.insideHumidityState);
+    } catch (e) {
+        log(`Could not create states for room ${room.roomName}: ${e}`, `error`);
+    }
 } // endFor
 
 on({id: triggersAlexa, change: `any`}, obj => {
     if (logging) log(`Alexa ventilation check triggered`, `info`);
     const room = rooms[triggersAlexa.indexOf(obj.id)];
-    const ventilate = getState(`${room.roomName}.ventilationRecommendation`).val;
+    const ventilate = getState(`${namespace ? `${namespace}.` : ''}${room.roomName}.ventilationRecommendation`).val;
     const randomState = getRandomArbitrary(1, 2);
     let text;
-    
-    if(ventilate) {
+
+    if (ventilate) {
         switch (randomState) {
             case 1:
                 text = `Du solltest lüften, da es draußen trockener ist`;
@@ -98,7 +115,7 @@ on({id: triggersAlexa, change: `any`}, obj => {
                 break;
         } // endSwitch
     } // endElse
-    
+
     // Get serial number of last used echo device, maybe timeout is unnecessary with new adapter version
     setTimeout(() => {
         const serialNumber = getState(`alexa2.0.History.serialNumber`).val;
@@ -114,12 +131,20 @@ on({id: triggersInsideHumidity, change: `any`}, obj => {
     const relHumidityInside = getState(room.insideHumidityState).val;
     const temperatureInside = getState(room.insideTemperatureState).val;
     // Calc ventilation recommendation and absolute humidity inside and outside
-    const jsonRes = ventilateRoom(relHumidityInside, temperatureInside, relHumidityOutdside, 
-                        temperatureOutside, room.humidityThreshold, room.minHumidity);
+    const jsonRes = ventilateRoom(relHumidityInside, temperatureInside, relHumidityOutdside,
+        temperatureOutside, room.humidityThreshold, room.minHumidity);
     // Set states
-    setState(`${room.roomName}.absoluteHumidity`, jsonRes.insideAbsoluteHumidity, true);
-    setState(`${room.roomName}.outsideAbsoluteHumidity`, jsonRes.outsideAbsoluteHumidity, true);
-    setState(`${room.roomName}.ventilationRecommendation`, jsonRes.ventilate, true);
+    setState(`${namespace ? `${namespace}.` : ''}${room.roomName}.absoluteHumidity`, jsonRes.insideAbsoluteHumidity, true);
+    setState(`${namespace ? `${namespace}.` : ''}${room.roomName}.outsideAbsoluteHumidity`, jsonRes.outsideAbsoluteHumidity, true);
+    setState(`${namespace ? `${namespace}.` : ''}${room.roomName}.ventilationRecommendation`, jsonRes.ventilate, true);
+
+    // now update our counter by checking all rooms recommendation
+    let counter;
+    for (const room of rooms) {
+        const val = getState(`${namespace ? `${namespace}.` : ''}${room.roomName}.ventilationRecommendation`).val;
+        counter = counter + +val;
+    }
+    setState(namespace ? `${namespace}.totalVentilationRecommendations` : `totalVentilationRecommendations`, counter, true);
 });
 
 /* Internals */
@@ -129,17 +154,14 @@ function calcAbsoluteHumidity(relHumidity, temperature) {
     return Math.round(res * 100) / 100;
 } // endCalcAbsoluteHumidity
 
-function ventilateRoom(relHumidityInside, tempInside, relHumidityOutside, tempOutside, 
-                threshold=2.0, minHumidity=50.0) {
+function ventilateRoom(relHumidityInside, tempInside, relHumidityOutside, tempOutside,
+                       threshold = 2.0, minHumidity = 50.0) {
     const res = {};
     res.insideAbsoluteHumidity = calcAbsoluteHumidity(relHumidityInside, tempInside);
     res.outsideAbsoluteHumidity = calcAbsoluteHumidity(relHumidityOutside, tempOutside);
     res.diff = Math.round((res.insideAbsoluteHumidity - res.outsideAbsoluteHumidity) * 100) / 100;
-    
-    if (res.diff > threshold && relHumidityInside > minHumidity)
-        res.ventilate = true;
-    else 
-        res.ventilate = false;
+
+    res.ventilate = res.diff > threshold && relHumidityInside > minHumidity;
     return res;
 } // endVentilateRoom
 
