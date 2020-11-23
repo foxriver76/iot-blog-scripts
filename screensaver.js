@@ -47,5 +47,5 @@ let handleScreensaverEvents = function () {
 let screensaverTimeout = setTimeout(activateScreensaver, screensaverSeconds * 1000);
 
 document.addEventListener('click', handleScreensaverEvents);
-document.body.addEventListener('mousemove', handleScreensaverEvents);
+document.addEventListener('mousemove', handleScreensaverEvents);
 document.addEventListener('touchmove', handleScreensaverEvents);
