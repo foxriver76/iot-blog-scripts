@@ -139,7 +139,7 @@ on({id: triggersInsideHumidity, change: `any`}, obj => {
     setState(`${namespace ? `${namespace}.` : ''}${room.roomName}.ventilationRecommendation`, jsonRes.ventilate, true);
 
     // now update our counter by checking all rooms recommendation
-    let counter;
+    let counter = 0;
     for (const room of rooms) {
         const val = getState(`${namespace ? `${namespace}.` : ''}${room.roomName}.ventilationRecommendation`).val;
         counter = counter + +val;
