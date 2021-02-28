@@ -4,12 +4,12 @@
     Switch to defined screensaver view, if no mousemovement or 
     click event detected for the defined seconds
 */
-let screensaverView = 'screensaver';
-let prevScreensaverView = 'home';
-let screensaverSeconds = 120;
-let debounce;
+var screensaverView = 'screensaver';
+var prevScreensaverView = 'home';
+var screensaverSeconds = 120;
+var debounce;
 
-let activateScreensaver = function () {
+var activateScreensaver = function () {
     screensaverTimeout = null;
     if (vis.activeView !== screensaverView) {
         // screensaver not active yet
@@ -19,7 +19,7 @@ let activateScreensaver = function () {
     }
 };
 
-let handleScreensaverEvents = function () {
+var handleScreensaverEvents = function () {
     if (debounce) {
         return;
     }
@@ -44,7 +44,7 @@ let handleScreensaverEvents = function () {
     screensaverTimeout = setTimeout(activateScreensaver, screensaverSeconds * 1000);
 };
 
-let screensaverTimeout = setTimeout(activateScreensaver, screensaverSeconds * 1000);
+var screensaverTimeout = setTimeout(activateScreensaver, screensaverSeconds * 1000);
 
 document.addEventListener('click', handleScreensaverEvents);
 document.addEventListener('mousemove', handleScreensaverEvents);
