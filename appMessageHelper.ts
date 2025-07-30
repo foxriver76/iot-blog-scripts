@@ -15,7 +15,7 @@ interface PushAction {
 interface PushNotificationAdditionalOptions {
     /** If url should be opened */
     openUrl?: string;
-    /** If additional actins should be shown */
+    /** If additional actions should be shown */
     actions?: PushAction[];
     /** If given will only be delivered to matching devices */
     devices?: string[];
